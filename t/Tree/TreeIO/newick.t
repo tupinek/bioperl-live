@@ -7,7 +7,7 @@ BEGIN {
     use lib '.';
     use Bio::Root::Test;
     
-    test_begin(-tests => 24);
+    test_begin(-tests => 27);
 	
     use_ok('Bio::TreeIO');
 }
@@ -132,3 +132,33 @@ $treeio = Bio::TreeIO->new(-format => 'newick',
 $tree = $treeio->next_tree;
 ok($tree);
 is($tree->get_nodes, 15);
+
+# bug 3039
+SKIP: {
+    test_skip(-tests => 3, -requires_module => 'IO::Scalar');
+
+    my $tree_string = '(a:1,b:2):0.0;';
+    my $in_fh = IO::Scalar->new(\$tree_string);
+    my $treein = Bio::TreeIO->new(
+        -format  => 'newick',
+        -verbose => 0,
+        -fh      => $in_fh,
+    );
+    
+    my $tree = $treein->next_tree;
+    isa_ok($tree, 'Bio::Tree::TreeI');
+
+    my $out_tree;
+    my $out_fh = IO::Scalar->new(\$out_tree);
+    my $treeout = Bio::TreeIO->new(
+        '-format' => 'newick',
+        '-fh'     => $out_fh,
+        '-flush',
+    );
+
+    $treeout->write_tree($tree);
+    ok($out_tree, 'wrote out tree');
+    chomp($out_tree);
+
+    is($tree_string, $out_tree, 'bug 3039 - root node branch length');
+}
