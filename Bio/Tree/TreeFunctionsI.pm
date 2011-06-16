@@ -343,8 +343,7 @@ sub splice {
  Function: given two or more nodes, returns the lowest common ancestor (aka most
            recent common ancestor)
  Returns : node object or undef if there is no common ancestor
- Args    : -nodes => arrayref of nodes to test, OR
-           just a list of nodes
+ Args    : A list of L<Bio::Tree::NodeI> nodes
 
 =cut
 
